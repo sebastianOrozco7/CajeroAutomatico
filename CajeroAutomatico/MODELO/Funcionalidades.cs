@@ -14,45 +14,55 @@ namespace CajeroAutomatico.MODELO
         ConexionDB conexionDB = new ConexionDB();
         public void Retirar(TextBox txbValorIngresado)
         {
-            using(SqlConnection conexion = conexionDB.AbrirConexion())
+            try
             {
-                string QuerySelect = "select Saldo From CUENTAS where IdUsuario = @idusuario";
-
-                int IdUsuario = 123456;
-                int SaldoUsuario = 0;
-
-                using (SqlCommand ComandoSelect = new SqlCommand(QuerySelect,conexion))
+                using (SqlConnection conexion = conexionDB.AbrirConexion())
                 {
-                    ComandoSelect.Parameters.AddWithValue("@idusuario", IdUsuario);
-                    object valor = ComandoSelect.ExecuteScalar();
+                    string QuerySelect = "select Saldo From CUENTAS where IdUsuario = @idusuario";
 
-                    if( valor != null)
+                    int IdUsuario = 1104546039;
+                    int SaldoUsuario = 0;
+                    int NuevoSaldo = 0;
+
+                    using (SqlCommand ComandoSelect = new SqlCommand(QuerySelect, conexion))
                     {
-                        SaldoUsuario = Convert.ToInt32(valor);
+                        ComandoSelect.Parameters.AddWithValue("@idusuario", IdUsuario);
+                        object valor = ComandoSelect.ExecuteScalar();
+
+                        if (valor != null)
+                        {
+                            SaldoUsuario = Convert.ToInt32(valor);
+                        }
+                    }
+
+                    int ValorIngresado = Convert.ToInt32(txbValorIngresado.Text);
+
+                    if (ValorIngresado < SaldoUsuario)
+                    {
+                        NuevoSaldo = SaldoUsuario - ValorIngresado;
+
+                        string QueryUpdate = "UPDATE CUENTAS SET Saldo = @NuevoSaldo WHERE IdUsuario = @IdUsuario";
+
+                        using (SqlCommand ComandoUpdate = new SqlCommand(QueryUpdate, conexion))
+                        {
+                            ComandoUpdate.Parameters.AddWithValue("@NuevoSaldo", NuevoSaldo);
+                            ComandoUpdate.Parameters.AddWithValue("@IdUsuario", IdUsuario);
+
+                            ComandoUpdate.ExecuteNonQuery();
+                        }
+                        MessageBox.Show("Retiro Exitoso" + "Exito" + MessageBoxButtons.OK + MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Saldo Insuficiente" + "Error" + MessageBoxButtons.OK + MessageBoxIcon.Warning);
                     }
                 }
-
-                int ValorIngresado = Convert.ToInt32(txbValorIngresado.Text);
-
-                int NuevoSaldo = SaldoUsuario - ValorIngresado;
-
-
-                string QueryUpdate = "UPDATE CUENTAS SET Saldo = @NuevoSaldo WHERE IdUsuario = @IdUsuario";
-
-                using(SqlCommand ComandoUpdate = new SqlCommand(QueryUpdate, conexion))
-                {
-                    ComandoUpdate.Parameters.AddWithValue("@NuevoSaldo", NuevoSaldo);
-                    ComandoUpdate.Parameters.AddWithValue("@IdUsuario", IdUsuario);
-
-                    ComandoUpdate.ExecuteNonQuery();
-                }
             }
+            catch (FormatException)
+            {
+                MessageBox.Show("ERROR DE FORMATO"+"Error"+ MessageBoxButtons.OK+MessageBoxIcon.Warning);
+            }
+            
         }
-        /*
-         ya se ejecuta la consulta y funcina correctamente
-         HACE FALTA:
-           verificar si el saldo a retirar es valido
-           añadir mensaje de que fue exitoso el retiro(no como boton si no como texto en un label)
-        */
     }
 }

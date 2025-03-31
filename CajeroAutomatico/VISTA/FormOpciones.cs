@@ -23,6 +23,7 @@ namespace CajeroAutomatico.VISTA
             Funcionalidades funcionalidades = new Funcionalidades();
 
             funcionalidades.Retirar(txbDineroRetirar);
+            txbDineroRetirar.Clear();
         }
     }
 }
